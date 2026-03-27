@@ -1,5 +1,7 @@
 # Sprite Autocutter Pro
 
+[![Play Online](https://img.shields.io/badge/Use_Tool_Online-BitAutocutter-00e5ff?style=for-the-badge&logo=github)](https://aronpolanco.github.io/bitautocutter/)
+
 A web-based, client-side tool designed for indie game developers and pixel artists. Sprite Autocutter Pro automatically detects, crops, and extracts individual sprites from a spritesheet or tilesheet, allowing you to export them as a ZIP file in seconds.
 
 ## Features
