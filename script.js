@@ -2,12 +2,10 @@ const upload = document.getElementById('upload');
 const detectBtn = document.getElementById('detectBtn');
 const cancelBtn = document.getElementById('cancelBtn');
 const previewContainer = document.getElementById('previewContainer');
-const sourcePreview = document.getElementById('sourcePreview');
 const statusMsg = document.getElementById('status');
 const paddingInput = document.getElementById('padding');
 const downloadSection = document.getElementById('downloadSection');
 const downloadZipBtn = document.getElementById('downloadZipBtn');
-const baseNameInput = document.getElementById('baseName');
 
 let currentImgSrc = null;
 
@@ -17,175 +15,111 @@ upload.addEventListener('change', (e) => {
         const reader = new FileReader();
         reader.onload = (event) => {
             currentImgSrc = event.target.result;
-            sourcePreview.innerHTML = `
-                <img src="${currentImgSrc}" id="activeImage" style="display:block; margin:auto; max-height: 300px;">
-            `;
-            statusMsg.textContent = "Imagen cargada. Pulsa Autodetectar para continuar.";
+            statusMsg.textContent = "Imagen lista. Haz clic en Autodetectar.";
         };
         reader.readAsDataURL(file);
     }
 });
 
 detectBtn.addEventListener('click', () => {
-    if (!currentImgSrc) {
-        alert("Por favor, sube una imagen primero.");
-        return;
-    }
+    if (!currentImgSrc) return alert("Sube una imagen.");
 
-    statusMsg.textContent = "⚙️ Procesando imagen...";
-    previewContainer.innerHTML = ''; 
-    downloadSection.style.display = 'none';
+    statusMsg.textContent = "✂️ Cortando...";
+    previewContainer.innerHTML = '';
 
     const img = new Image();
     img.src = currentImgSrc;
 
     img.onload = () => {
-        const procCanvas = document.createElement('canvas');
-        const procCtx = procCanvas.getContext('2d');
-        procCanvas.width = img.width;
-        procCanvas.height = img.height;
-        procCtx.drawImage(img, 0, 0);
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = img.width; canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
 
-        let imageData = procCtx.getImageData(0, 0, img.width, img.height);
-        let pixels = imageData.data;
+        const imageData = ctx.getImageData(0, 0, img.width, img.height);
+        const pixels = imageData.data;
 
-        // 👻 MODO FANTASMA: Si la esquina superior izquierda NO es transparente, 
-        // asumimos que es un fondo sólido (ej. blanco de Photoroom) y lo matamos en silencio.
-        const bgA = pixels[3];
-        if (bgA > 10) {
-            const bgR = pixels[0];
-            const bgG = pixels[1];
-            const bgB = pixels[2];
-            const tolerance = 5; 
-
+        // Borrar fondo sólido si existe (Modo Fantasma)
+        if (pixels[3] > 10) {
+            const r = pixels[0], g = pixels[1], b = pixels[2];
             for (let i = 0; i < pixels.length; i += 4) {
-                if (Math.abs(pixels[i] - bgR) <= tolerance && 
-                    Math.abs(pixels[i+1] - bgG) <= tolerance && 
-                    Math.abs(pixels[i+2] - bgB) <= tolerance) {
-                    pixels[i + 3] = 0; // Lo hacemos transparente
-                }
+                if (Math.abs(pixels[i]-r)<5 && Math.abs(pixels[i+1]-g)<5 && Math.abs(pixels[i+2]-b)<5) pixels[i+3]=0;
             }
-            procCtx.putImageData(imageData, 0, 0);
         }
 
-        // Ahora sí, el algoritmo corta buscando la transparencia
-        const isBackground = (index) => pixels[index + 3] < 10; 
-
         const visited = new Uint8Array(img.width * img.height);
-        const spriteBlocks = []; 
+        const blocks = [];
 
         for (let y = 0; y < img.height; y++) {
             for (let x = 0; x < img.width; x++) {
-                const pixelIndex = (y * img.width + x) * 4;
-
-                if (!visited[y * img.width + x] && !isBackground(pixelIndex)) {
+                const idx = (y * img.width + x) * 4;
+                if (!visited[y * img.width + x] && pixels[idx + 3] > 10) {
                     const block = { minX: x, minY: y, maxX: x, maxY: y };
                     const queue = [[x, y]];
                     visited[y * img.width + x] = 1;
 
                     while (queue.length > 0) {
-                        const [currX, currY] = queue.shift();
+                        const [cx, cy] = queue.shift();
+                        block.minX = Math.min(block.minX, cx);
+                        block.minY = Math.min(block.minY, cy);
+                        block.maxX = Math.max(block.maxX, cx);
+                        block.maxY = Math.max(block.maxY, cy);
 
-                        block.minX = Math.min(block.minX, currX);
-                        block.minY = Math.min(block.minY, currY);
-                        block.maxX = Math.max(block.maxX, currX);
-                        block.maxY = Math.max(block.maxY, currY);
-
-                        // --- MEJORA V4.0: Rango de salto de 3 píxeles ---
-                        const gap = 3; // Distancia para conectar destellos o efectos separados
-                        
-                        for (let dy = -gap; dy <= gap; dy++) {
-                            for (let dx = -gap; dx <= gap; dx++) {
-                                const nx = currX + dx;
-                                const ny = currY + dy;
-
+                        // Rango de búsqueda: 1 píxel (Equilibrado para efectos)
+                        for (let dy = -1; dy <= 1; dy++) {
+                            for (let dx = -1; dx <= 1; dx++) {
+                                const nx = cx + dx, ny = cy + dy;
                                 if (nx >= 0 && nx < img.width && ny >= 0 && ny < img.height) {
-                                    const nVisitedIndex = ny * img.width + nx;
-                                    const nPixelIndex = nVisitedIndex * 4;
-
-                                    if (!visited[nVisitedIndex] && !isBackground(nPixelIndex)) {
-                                        visited[nVisitedIndex] = 1;
+                                    const nIdx = ny * img.width + nx;
+                                    if (!visited[nIdx] && pixels[nIdx * 4 + 3] > 10) {
+                                        visited[nIdx] = 1;
                                         queue.push([nx, ny]);
                                     }
                                 }
                             }
                         }
                     }
-                    spriteBlocks.push(block);
+                    // Solo agregar si el bloque tiene un tamaño mínimo (evitar basura)
+                    if ((block.maxX - block.minX) > 1) blocks.push(block);
                 }
             }
         }
 
-        const padding = parseInt(paddingInput.value) || 0;
-        let count = 0;
-
-        spriteBlocks.sort((a, b) => (a.minY - b.minY) || (a.minX - b.minX));
-
-        spriteBlocks.forEach(block => {
-            const width = (block.maxX - block.minX + 1) + (padding * 2);
-            const height = (block.maxY - block.minY + 1) + (padding * 2);
-
-            const canvas = document.createElement('canvas');
-            canvas.width = width;
-            canvas.height = height;
-            const ctx = canvas.getContext('2d');
-
-            ctx.drawImage(
-                procCanvas,
-                block.minX, block.minY, block.maxX - block.minX + 1, block.maxY - block.minY + 1,
-                padding, padding, block.maxX - block.minX + 1, block.maxY - block.minY + 1
-            );
-
-            canvas.classList.add('selected'); 
-            canvas.title = "Clic para seleccionar/deseleccionar";
-            canvas.addEventListener('click', () => {
-                canvas.classList.toggle('selected');
-            });
-            
-            previewContainer.appendChild(canvas);
-            count++;
+        const pad = parseInt(paddingInput.value) || 0;
+        blocks.sort((a,b) => a.minY - b.minY || a.minX - b.minX).forEach(b => {
+            const w = (b.maxX - b.minX + 1) + (pad * 2);
+            const h = (b.maxY - b.minY + 1) + (pad * 2);
+            const c = document.createElement('canvas');
+            c.width = w; c.height = h;
+            const cx = c.getContext('2d');
+            cx.drawImage(canvas, b.minX, b.minY, b.maxX-b.minX+1, b.maxY-b.minY+1, pad, pad, b.maxX-b.minX+1, b.maxY-b.minY+1);
+            c.classList.add('selected');
+            c.onclick = () => c.classList.toggle('selected');
+            previewContainer.appendChild(c);
         });
 
-        statusMsg.textContent = `✅ Se detectaron ${count} sprites. ¡Elige cuáles quieres descargar!`;
-        downloadSection.style.display = 'block'; 
+        statusMsg.textContent = `✅ Detectados: ${blocks.length}`;
+        downloadSection.style.display = 'block';
     };
 });
 
-downloadZipBtn.addEventListener('click', async () => {
-    const selectedCanvases = document.querySelectorAll('canvas.selected');
-    if (selectedCanvases.length === 0) return alert("¡No tienes ningún sprite seleccionado!");
+downloadZipBtn.onclick = async () => {
+    const selected = document.querySelectorAll('canvas.selected');
+    if (!selected.length) return;
+    const zip = new JSZip();
+    const name = document.getElementById('baseName').value || "sprite";
+    
+    for (let i = 0; i < selected.length; i++) {
+        const blob = await new Promise(res => selected[i].toBlob(res));
+        zip.file(`${name}_${i+1}.png`, blob);
+    }
 
-    statusMsg.textContent = "📦 Generando archivo ZIP, por favor espera...";
-    const baseName = baseNameInput.value.trim() || "sprite";
-    const zip = new JSZip(); 
-
-    const promises = Array.from(selectedCanvases).map((canvas, index) => {
-        return new Promise((resolve) => {
-            canvas.toBlob((blob) => {
-                zip.file(`${baseName}${index + 1}.png`, blob);
-                resolve();
-            });
-        });
+    zip.generateAsync({type:"blob"}).then(content => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(content);
+        a.download = `${name}_pack.zip`;
+        a.click();
     });
+};
 
-    await Promise.all(promises);
-
-    zip.generateAsync({ type: "blob" }).then((content) => {
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(content);
-        link.download = `${baseName}_pack.zip`; 
-        link.click();
-        statusMsg.textContent = `✅ ZIP descargado exitosamente.`;
-    });
-});
-
-cancelBtn.addEventListener('click', () => {
-    upload.value = ""; 
-    sourcePreview.innerHTML = ""; 
-    previewContainer.innerHTML = ""; 
-    statusMsg.textContent = "Detección cancelada. Sube otra imagen.";
-    currentImgSrc = null;
-    paddingInput.value = 5;
-    downloadSection.style.display = 'none'; 
-    baseNameInput.value = 'sprite'; 
-});
+cancelBtn.onclick = () => location.reload();
