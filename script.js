@@ -49,7 +49,26 @@ detectBtn.addEventListener('click', () => {
         let imageData = procCtx.getImageData(0, 0, img.width, img.height);
         let pixels = imageData.data;
 
-        // El algoritmo busca exclusivamente píxeles transparentes (Alpha < 10)
+        // 👻 MODO FANTASMA: Si la esquina superior izquierda NO es transparente, 
+        // asumimos que es un fondo sólido (ej. blanco de Photoroom) y lo matamos en silencio.
+        const bgA = pixels[3];
+        if (bgA > 10) {
+            const bgR = pixels[0];
+            const bgG = pixels[1];
+            const bgB = pixels[2];
+            const tolerance = 5; 
+
+            for (let i = 0; i < pixels.length; i += 4) {
+                if (Math.abs(pixels[i] - bgR) <= tolerance && 
+                    Math.abs(pixels[i+1] - bgG) <= tolerance && 
+                    Math.abs(pixels[i+2] - bgB) <= tolerance) {
+                    pixels[i + 3] = 0; // Lo hacemos transparente
+                }
+            }
+            procCtx.putImageData(imageData, 0, 0);
+        }
+
+        // Ahora sí, el algoritmo corta buscando la transparencia
         const isBackground = (index) => pixels[index + 3] < 10; 
 
         const visited = new Uint8Array(img.width * img.height);
