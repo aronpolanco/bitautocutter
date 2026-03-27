@@ -49,53 +49,7 @@ detectBtn.addEventListener('click', () => {
         let imageData = procCtx.getImageData(0, 0, img.width, img.height);
         let pixels = imageData.data;
 
-        // LÓGICA V2.0 PRO: Remover fondos sólidos (Color Keying)
-        const removeBg = document.getElementById('removeBg');
-        if (removeBg && removeBg.checked) {
-            const bgR1 = pixels[0];
-            const bgG1 = pixels[1];
-            const bgB1 = pixels[2];
-            const bgA1 = pixels[3];
-
-            let bgR2 = bgR1, bgG2 = bgG1, bgB2 = bgB1, bgA2 = bgA1;
-            let foundSecondColor = false;
-            const tolerance = 5; 
-
-            if (bgA1 > 10) {
-                for (let x = 0; x < img.width; x++) {
-                    const pixelIndex = x * 4;
-                    const r = pixels[pixelIndex];
-                    const g = pixels[pixelIndex + 1];
-                    const b = pixels[pixelIndex + 2];
-                    const a = pixels[pixelIndex + 3];
-
-                    if (Math.abs(r - bgR1) > tolerance ||
-                        Math.abs(g - bgG1) > tolerance ||
-                        Math.abs(b - bgB1) > tolerance) {
-                        bgR2 = r; bgG2 = g; bgB2 = b; bgA2 = a;
-                        foundSecondColor = true;
-                        break; 
-                    }
-                }
-            }
-
-            if (bgA1 > 10) {
-                for (let i = 0; i < pixels.length; i += 4) {
-                    const r = pixels[i];
-                    const g = pixels[i + 1];
-                    const b = pixels[i + 2];
-
-                    const isColor1 = (Math.abs(r - bgR1) <= tolerance && Math.abs(g - bgG1) <= tolerance && Math.abs(b - bgB1) <= tolerance);
-                    const isColor2 = foundSecondColor && (Math.abs(r - bgR2) <= tolerance && Math.abs(g - bgG2) <= tolerance && Math.abs(b - bgB2) <= tolerance);
-
-                    if (isColor1 || isColor2) {
-                        pixels[i + 3] = 0; 
-                    }
-                }
-                procCtx.putImageData(imageData, 0, 0);
-            }
-        }
-        
+        // El algoritmo busca exclusivamente píxeles transparentes (Alpha < 10)
         const isBackground = (index) => pixels[index + 3] < 10; 
 
         const visited = new Uint8Array(img.width * img.height);
