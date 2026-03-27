@@ -49,7 +49,7 @@ detectBtn.addEventListener('click', async () => {
             // Configuración de la IA para cargar desde CDN y usar modelo rápido (small)
             const config = {
                 publicPath: "https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.3/dist/assets/",
-                model: "small"
+                model: "medium"
             };
 
             // Ejecutamos la magia de la IA
