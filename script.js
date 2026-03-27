@@ -1,47 +1,4 @@
-const upload = document.getElementById('upload');
-const detectBtn = document.getElementById('detectBtn');
-const cancelBtn = document.getElementById('cancelBtn');
-const previewContainer = document.getElementById('previewContainer');
-const sourcePreview = document.getElementById('sourcePreview');
-const statusMsg = document.getElementById('status');
-const paddingInput = document.getElementById('padding');
-
-// Nuevos elementos
-const downloadSection = document.getElementById('downloadSection');
-const downloadZipBtn = document.getElementById('downloadZipBtn');
-const baseNameInput = document.getElementById('baseName');
-
-let currentImgSrc = null;
-
-upload.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            currentImgSrc = event.target.result;
-            sourcePreview.innerHTML = `
-                <img src="${currentImgSrc}" id="activeImage" style="display:block; margin:auto;">
-            `;
-            statusMsg.textContent = "Imagen cargada. Pulsa ✨ Autodetectar para continuar.";
-        };
-        reader.readAsDataURL(file);
-    }
-});
-
-detectBtn.addEventListener('click', () => {
-    if (!currentImgSrc) {
-        alert("Por favor, sube una imagen primero.");
-        return;
-    }
-
-    statusMsg.textContent = "⚙️ Procesando imagen...";
-    previewContainer.innerHTML = ''; 
-    downloadSection.style.display = 'none'; // Ocultar mientras carga
-
-    const img = new Image();
-    img.src = currentImgSrc;
-
-    img.onload = () => {
+img.onload = () => {
         const procCanvas = document.createElement('canvas');
         const procCtx = procCanvas.getContext('2d');
         procCanvas.width = img.width;
@@ -51,6 +8,36 @@ detectBtn.addEventListener('click', () => {
         const imageData = procCtx.getImageData(0, 0, img.width, img.height);
         const pixels = imageData.data;
 
+        // NUEVA LÓGICA V2.0: Remover fondo sólido
+        const removeBg = document.getElementById('removeBg');
+        if (removeBg && removeBg.checked) {
+            // Tomar el color del píxel (0,0) como referencia de fondo
+            const bgR = pixels[0];
+            const bgG = pixels[1];
+            const bgB = pixels[2];
+            const bgA = pixels[3];
+
+            // Si el fondo no es ya transparente, lo borramos
+            if (bgA > 10) {
+                const tolerance = 5; // Tolerancia para pequeñas variaciones de color (ej. JPG artifacts)
+                for (let i = 0; i < pixels.length; i += 4) {
+                    const r = pixels[i];
+                    const g = pixels[i + 1];
+                    const b = pixels[i + 2];
+                    
+                    // Si el color del píxel es casi igual al color de fondo, lo hacemos transparente
+                    if (Math.abs(r - bgR) <= tolerance && 
+                        Math.abs(g - bgG) <= tolerance && 
+                        Math.abs(b - bgB) <= tolerance) {
+                        pixels[i + 3] = 0; // Alpha a 0 (Transparente)
+                    }
+                }
+                // Aplicar los cambios al canvas procesado
+                procCtx.putImageData(imageData, 0, 0);
+            }
+        }
+
+        // El algoritmo ahora solo busca transparencia pura
         const isBackground = (index) => pixels[index + 3] < 10; 
 
         const visited = new Uint8Array(img.width * img.height);
@@ -98,7 +85,6 @@ detectBtn.addEventListener('click', () => {
         const padding = parseInt(paddingInput.value) || 0;
         let count = 0;
 
-        // Ordenar los sprites de izquierda a derecha, arriba a abajo (opcional pero recomendado)
         spriteBlocks.sort((a, b) => (a.minY - b.minY) || (a.minX - b.minX));
 
         spriteBlocks.forEach(block => {
@@ -110,14 +96,15 @@ detectBtn.addEventListener('click', () => {
             canvas.height = height;
             const ctx = canvas.getContext('2d');
 
+            // CAMBIO CLAVE: Ahora dibujamos desde 'procCanvas' en lugar de 'img'
+            // Así los sprites conservan la transparencia que acabamos de generar
             ctx.drawImage(
-                img,
+                procCanvas,
                 block.minX, block.minY, block.maxX - block.minX + 1, block.maxY - block.minY + 1,
                 padding, padding, block.maxX - block.minX + 1, block.maxY - block.minY + 1
             );
 
-            // NUEVO: Lógica de selección
-            canvas.classList.add('selected'); // Todos seleccionados por defecto
+            canvas.classList.add('selected'); 
             canvas.title = "Clic para seleccionar/deseleccionar";
             canvas.addEventListener('click', () => {
                 canvas.classList.toggle('selected');
@@ -128,56 +115,5 @@ detectBtn.addEventListener('click', () => {
         });
 
         statusMsg.textContent = `✅ Se detectaron ${count} sprites. ¡Elige cuáles quieres descargar!`;
-        downloadSection.style.display = 'block'; // Mostrar opciones de descarga
+        downloadSection.style.display = 'block'; 
     };
-});
-
-// NUEVO: Lógica para descargar el ZIP
-downloadZipBtn.addEventListener('click', async () => {
-    // Buscar todos los canvas que tengan la clase 'selected'
-    const selectedCanvases = document.querySelectorAll('canvas.selected');
-    
-    if (selectedCanvases.length === 0) {
-        alert("¡No tienes ningún sprite seleccionado!");
-        return;
-    }
-
-    statusMsg.textContent = "📦 Generando archivo ZIP, por favor espera...";
-    
-    const baseName = baseNameInput.value.trim() || "sprite";
-    const zip = new JSZip(); // Iniciamos la librería ZIP
-
-    // Convertir cada canvas en un archivo de imagen asíncronamente
-    const promises = Array.from(selectedCanvases).map((canvas, index) => {
-        return new Promise((resolve) => {
-            canvas.toBlob((blob) => {
-                // Nombramos el archivo: baseName + numero (ej. car1.png)
-                zip.file(`${baseName}${index + 1}.png`, blob);
-                resolve();
-            });
-        });
-    });
-
-    // Esperamos a que todos los canvas se conviertan a imágenes
-    await Promise.all(promises);
-
-    // Generar y descargar el ZIP
-    zip.generateAsync({ type: "blob" }).then((content) => {
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(content);
-        link.download = `${baseName}_pack.zip`; // Nombre del zip final
-        link.click();
-        
-        statusMsg.textContent = `✅ ZIP descargado exitosamente con ${selectedCanvases.length} imágenes.`;
-    });
-});
-
-cancelBtn.addEventListener('click', () => {
-    upload.value = ""; 
-    sourcePreview.innerHTML = ""; 
-    previewContainer.innerHTML = ""; 
-    statusMsg.textContent = "Detección cancelada. Sube otra imagen.";
-    currentImgSrc = null;
-    paddingInput.value = 5;
-    downloadSection.style.display = 'none'; // Ocultar descargas
-});
