@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sprite Cutter Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Bit Autocutter</h1>
+            <p>Sube tu spritesheet. Detectaremos y cortaremos automáticamente.</p>
+        </header>
+        
+        <div class="controls">
+            <div class="input-group">
+                <label for="upload">1. Sube tu Imagen:</label>
+                <input type="file" id="upload" accept="image/*">
+            </div>
+            
+            <div class="input-group padding-control">
+                <label>Padding de seguridad (px):</label>
+                <input type="number" id="padding" placeholder="5" value="5">
+            </div>
+
+            <div class="button-group">
+                <button id="detectBtn" class="primary-btn"> Autodetectar y Cortar</button>
+                <button id="cancelBtn" class="secondary-btn"> Cancelar</button>
+            </div>
+        </div>
+
+        <div id="status" class="status-msg"></div>
+        <div id="sourcePreview" class="source-preview"></div>
+
+        <hr>
+
+        <div id="downloadSection" class="download-section" style="display: none;">
+            <h3>⬇️ Exportar Selección</h3>
+            <p>Haz clic en los sprites para seleccionarlos/deseleccionarlos.</p>
+            <div class="input-group">
+                <label>Nombre base:</label>
+                <input type="text" id="baseName" placeholder="ej. car" value="sprite">
+                <button id="downloadZipBtn" class="primary-btn" style="margin-left: 10px;">📦 Descargar ZIP</button>
+            </div>
+        </div>
+
+        <div id="previewContainer" class="preview-grid">
+            </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

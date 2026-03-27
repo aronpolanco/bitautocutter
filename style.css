@@ -1,0 +1,220 @@
+:root {
+    --bg-color: #1a1a24; /* Azul oscuro retro */
+    --card-bg: #222233; /* Fondo de los paneles */
+    --accent: #00e5ff; /* Cyan Arcade */
+    --accent-hover: #00b3cc;
+    --danger: #ff0055; /* Rosa/Rojo Arcade */
+    --select-color: #39ff14; /* Verde neón 8-bit */
+    --text: #f0f0f0;
+    --border-color: #ffffff;
+}
+
+body {
+    font-family: 'VT323', monospace;
+    font-size: 22px;
+    background-color: var(--bg-color);
+    color: var(--text);
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    /* Cuadrícula estilo monitor viejo */
+    background-image: linear-gradient(rgba(0, 229, 255, 0.05) 1px, transparent 1px), 
+                      linear-gradient(90deg, rgba(0, 229, 255, 0.05) 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+
+.container {
+    width: 100%;
+    max-width: 900px;
+    text-align: center;
+}
+
+/* Título 100% 8-bit */
+header h1 {
+    font-family: 'Press Start 2P', cursive;
+    font-size: 2rem;
+    color: var(--accent);
+    margin: 20px 0;
+    text-shadow: 4px 4px 0 #000;
+    line-height: 1.4;
+}
+
+header p {
+    color: #aaa;
+    font-size: 1.3rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 30px;
+}
+
+/* Contenedores estilo bloque */
+.controls, .download-section, .preview-grid {
+    background: var(--card-bg);
+    padding: 20px;
+    margin-bottom: 25px;
+    border: 4px solid var(--border-color);
+    box-shadow: 8px 8px 0 #000; /* Sombra dura de 8-bits */
+}
+
+/* Inputs pixelados */
+input[type="number"], input[type="text"], input[type="file"] {
+    font-family: 'VT323', monospace;
+    font-size: 20px;
+    padding: 8px;
+    background: #000;
+    color: var(--accent);
+    border: 4px solid #555;
+    outline: none;
+    text-transform: uppercase;
+}
+
+input[type="number"]:focus, input[type="text"]:focus {
+    border-color: var(--accent);
+}
+
+.input-group {
+    margin: 15px 0;
+}
+
+/* Botones Arcade interactivos */
+button {
+    font-family: 'Press Start 2P', cursive;
+    font-size: 12px; /* Esta fuente es muy ancha, 12px es ideal */
+    padding: 15px 20px;
+    border: 4px solid #fff;
+    cursor: pointer;
+    text-transform: uppercase;
+    box-shadow: 6px 6px 0 #000;
+    margin: 5px;
+    transition: transform 0.1s, box-shadow 0.1s;
+}
+
+button:active {
+    transform: translate(6px, 6px);
+    box-shadow: 0px 0px 0 #000; /* Efecto de presionar el botón de la maquinita */
+}
+
+.primary-btn { 
+    background-color: var(--accent); 
+    color: #000; 
+    border-color: #fff;
+}
+
+.primary-btn:hover { background-color: #fff; color: #000; border-color: var(--accent); }
+
+.secondary-btn { 
+    background-color: var(--danger); 
+    color: #fff; 
+    border-color: #fff;
+}
+
+.secondary-btn:hover { background-color: #fff; color: #000; border-color: var(--danger); }
+
+/* Status */
+.status-msg { 
+    margin: 15px 0; 
+    color: #ffcc00; 
+    font-size: 1.4rem;
+    text-shadow: 2px 2px 0 #000;
+}
+
+/* Canvas y selección */
+.preview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+    gap: 15px;
+    min-height: 100px;
+}
+
+canvas {
+    border: 4px solid #444;
+    background-color: #000; 
+    /* Checkerboard retro */
+    background-image: linear-gradient(45deg, #1a1a1a 25%, transparent 25%), 
+                      linear-gradient(-45deg, #1a1a1a 25%, transparent 25%),
+                      linear-gradient(45deg, transparent 75%, #1a1a1a 75%),
+                      linear-gradient(-45deg, transparent 75%, #1a1a1a 75%);
+    background-size: 16px 16px;
+    image-rendering: pixelated; 
+    cursor: pointer;
+    box-shadow: 4px 4px 0 #000;
+    transition: transform 0.1s;
+}
+
+canvas:hover {
+    transform: translateY(-5px);
+    border-color: #fff;
+}
+
+/* Sprite seleccionado (Borde verde neón) */
+canvas.selected {
+    border: 4px solid var(--select-color);
+    box-shadow: 0 0 15px var(--select-color), 4px 4px 0 #000;
+}
+
+hr {
+    border: none;
+    border-top: 4px dashed #555;
+    margin: 30px 0;
+}
+@media (max-width: 768px) {
+    body { 
+        padding: 10px; 
+        font-size: 18px; 
+    }
+    
+    header h1 { 
+        font-size: 1.2rem; /* Achicamos el título 8-bit para que quepa */
+        margin: 10px 0;
+        text-shadow: 2px 2px 0 #000;
+    }
+    
+    header p { 
+        font-size: 1rem; 
+        margin-bottom: 15px; 
+    }
+    
+    .controls, .download-section, .preview-grid {
+        padding: 15px;
+        border-width: 3px; /* Bordes un poco más finos en móvil */
+        box-shadow: 4px 4px 0 #000;
+    }
+    
+    .button-group {
+        display: flex;
+        flex-direction: column; /* Apilamos los botones uno sobre otro */
+        gap: 12px;
+    }
+    
+    button {
+        width: 100%; /* Botones de lado a lado para tocarlos fácil con el dedo */
+        margin: 0;
+        padding: 15px;
+        font-size: 10px; /* Ajuste para la fuente Press Start 2P */
+    }
+    
+    .input-group {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    input[type="number"], input[type="text"], input[type="file"] {
+        width: 100%; /* Inputs a pantalla completa */
+        box-sizing: border-box;
+        margin-top: 8px;
+    }
+
+    /* Para que el input y el botón de descarga en móvil se vean bien */
+    #downloadSection .input-group button {
+        margin-left: 0;
+        margin-top: 10px;
+    }
+    
+    .preview-grid {
+        /* Sprites un poco más apretados para aprovechar el espacio en vertical */
+        grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)); 
+        gap: 10px;
+    }
+}
