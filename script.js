@@ -91,19 +91,22 @@ detectBtn.addEventListener('click', () => {
                         block.maxX = Math.max(block.maxX, currX);
                         block.maxY = Math.max(block.maxY, currY);
 
-                        const neighbors = [
-                            [currX + 1, currY], [currX - 1, currY],
-                            [currX, currY + 1], [currX, currY - 1]
-                        ];
+                        // --- MEJORA V4.0: Rango de salto de 3 píxeles ---
+                        const gap = 3; // Distancia para conectar destellos o efectos separados
+                        
+                        for (let dy = -gap; dy <= gap; dy++) {
+                            for (let dx = -gap; dx <= gap; dx++) {
+                                const nx = currX + dx;
+                                const ny = currY + dy;
 
-                        for (const [nx, ny] of neighbors) {
-                            if (nx >= 0 && nx < img.width && ny >= 0 && ny < img.height) {
-                                const nVisitedIndex = ny * img.width + nx;
-                                const nPixelIndex = nVisitedIndex * 4;
+                                if (nx >= 0 && nx < img.width && ny >= 0 && ny < img.height) {
+                                    const nVisitedIndex = ny * img.width + nx;
+                                    const nPixelIndex = nVisitedIndex * 4;
 
-                                if (!visited[nVisitedIndex] && !isBackground(nPixelIndex)) {
-                                    visited[nVisitedIndex] = 1;
-                                    queue.push([nx, ny]);
+                                    if (!visited[nVisitedIndex] && !isBackground(nPixelIndex)) {
+                                        visited[nVisitedIndex] = 1;
+                                        queue.push([nx, ny]);
+                                    }
                                 }
                             }
                         }
