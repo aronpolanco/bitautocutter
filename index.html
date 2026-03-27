@@ -6,39 +6,46 @@
     <title>Bit Autocutter</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.3/dist/browser/imglyRemoveBackground.umd.js"></script>
 </head>
 <body>
     <div class="container">
         <header>
             <h1>Bit Autocutter</h1>
-            <p>Sube tu spritesheet. Detectaremos y cortaremos automáticamente.</p>
+            <p>Corta y empaqueta tus spritesheets en segundos.</p>
         </header>
         
         <div class="controls">
-            <div class="input-group">
-                <label for="upload">1. Sube tu Imagen:</label>
-                <input type="file" id="upload" accept="image/*">
-            </div>
-            
-            <div class="input-group padding-control">
-                <label>Padding de seguridad (px):</label>
-                <input type="number" id="padding" placeholder="5" value="5">
+            <div class="step-box">
+                <h3>Paso 1: ¿Fondo Complejo?</h3>
+                <p>Si tu imagen tiene sombras, paisajes o un "falso PNG" de cuadritos, límpiala gratis con IA antes de cortarla.</p>
+                <a href="https://www.photoroom.com/tools/background-remover" target="_blank" class="photoroom-btn">🪄 Limpiar en Photoroom</a>
             </div>
 
-            <div class="input-group padding-control">
-                <label style="cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;">
-                    <input type="checkbox" id="removeBg" checked style="width: auto;"> 
-                    ✨ IA: Borrar Fondo Complejo
-                </label>
-                <p style="color: #aaa; font-size: 0.8rem;">(Descarga ~40MB la primera vez. Tarda unos segundos en procesar)</p>
-            </div>
+            <div class="step-box">
+                <h3>Paso 2: Cortar Sprites</h3>
+                <div class="input-group">
+                    <label for="upload">Sube tu imagen (PNG transparente):</label>
+                    <input type="file" id="upload" accept="image/*">
+                </div>
+                
+                <div class="input-group padding-control">
+                    <label>Padding de seguridad (px):</label>
+                    <input type="number" id="padding" placeholder="5" value="5">
+                </div>
 
-            <div class="button-group">
-                <button id="detectBtn" class="primary-btn"> Autodetectar y Cortar</button>
-                <button id="cancelBtn" class="secondary-btn"> Cancelar</button>
+                <div class="input-group padding-control">
+                    <label style="cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                        <input type="checkbox" id="removeBg" checked style="width: auto;"> 
+                        Quitar fondo de color sólido
+                    </label>
+                    <p style="color: #aaa; font-size: 0.8rem;">(Solo útil para fondos de 1 color puro. Usa el Paso 1 para el resto)</p>
+                </div>
+
+                <div class="button-group">
+                    <button id="detectBtn" class="primary-btn">✂️ Autodetectar y Cortar</button>
+                    <button id="cancelBtn" class="secondary-btn">🗑️ Cancelar</button>
+                </div>
             </div>
         </div>
 
