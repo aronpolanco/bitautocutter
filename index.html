@@ -25,7 +25,13 @@
                 <label>Padding de seguridad (px):</label>
                 <input type="number" id="padding" placeholder="5" value="5">
             </div>
-
+<div class="input-group padding-control">
+    <label style="cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;">
+        <input type="checkbox" id="removeBg" checked style="width: auto;"> 
+        Quitar fondo sólido
+    </label>
+    <p style="color: #aaa; font-size: 0.8rem;">(Usa el color de la esquina superior izquierda como fondo)</p>
+</div>
             <div class="button-group">
                 <button id="detectBtn" class="primary-btn"> Autodetectar y Cortar</button>
                 <button id="cancelBtn" class="secondary-btn"> Cancelar</button>
