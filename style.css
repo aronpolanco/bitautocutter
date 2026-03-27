@@ -218,3 +218,12 @@ hr {
         gap: 10px;
     }
 }
+/* Estado del botón mientras la IA procesa */
+button:disabled {
+    background-color: #555 !important;
+    color: #888 !important;
+    border-color: #444 !important;
+    cursor: not-allowed;
+    box-shadow: none !important;
+    transform: translate(6px, 6px);
+}
