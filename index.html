@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bit Autocutter</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=3">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
 <body>
@@ -17,26 +17,26 @@
         
         <div class="controls">
             <div class="step-box">
-                <h3>Paso 1: ¿Fondo Complejo?</h3>
-                <p>Si tu imagen tiene sombras, paisajes o un "falso PNG" de cuadritos, límpiala gratis con IA antes de cortarla.</p>
-                <a href="https://www.photoroom.com/tools/background-remover" target="_blank" class="photoroom-btn"> Limpiar en Photoroom</a>
+                <h3>Paso 1: ¿Fondo con Cuadritos?</h3>
+                <p>Si tu imagen tiene el "falso PNG" de cuadritos o fondo blanco, límpiala aquí primero:</p>
+                <a href="https://www.photoroom.com/tools/background-remover" target="_blank" class="photoroom-btn">🪄 Limpiar en Photoroom</a>
             </div>
 
             <div class="step-box">
                 <h3>Paso 2: Cortar Sprites</h3>
                 <div class="input-group">
-                    <label for="upload">Sube tu imagen (PNG transparente):</label>
+                    <label for="upload">Sube el PNG transparente:</label>
                     <input type="file" id="upload" accept="image/*">
                 </div>
                 
                 <div class="input-group padding-control">
-                    <label>Padding de seguridad (px):</label>
-                    <input type="number" id="padding" placeholder="5" value="5">
+                    <label>Padding (px):</label>
+                    <input type="number" id="padding" value="5">
                 </div>
 
                 <div class="button-group">
-                    <button id="detectBtn" class="primary-btn"> Autodetectar y Cortar</button>
-                    <button id="cancelBtn" class="secondary-btn"> Cancelar</button>
+                    <button id="detectBtn" class="primary-btn"> Autodetectar</button>
+                    <button id="cancelBtn" class="secondary-btn"> Reiniciar</button>
                 </div>
             </div>
         </div>
@@ -48,16 +48,13 @@
 
         <div id="downloadSection" class="download-section" style="display: none;">
             <h3> Exportar Selección</h3>
-            <p>Haz clic en los sprites para seleccionarlos/deseleccionarlos.</p>
             <div class="input-group">
-                <label>Nombre base:</label>
-                <input type="text" id="baseName" placeholder="ej. car" value="sprite">
-                <button id="downloadZipBtn" class="primary-btn" style="margin-left: 10px;"> Descargar ZIP</button>
+                <input type="text" id="baseName" placeholder="Nombre base" value="sprite">
+                <button id="downloadZipBtn" class="primary-btn"> Descargar ZIP</button>
             </div>
         </div>
 
-        <div id="previewContainer" class="preview-grid">
-            </div>
+        <div id="previewContainer" class="preview-grid"></div>
     </div>
     <script src="script.js"></script>
 </body>
